@@ -1,10 +1,9 @@
 import { SoundEngine } from './audio.js';
 import { BunkerBuilder } from './bunker.js';
-import { OfficerAI } from './officer.js';
-import { ShermanBreachManager } from './sherman.js';
 import { TouchControls } from './touchControls.js';
+import { OfficerAI } from './officer.js';
 
-class MobileGame {
+class Game {
     constructor() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -12,50 +11,49 @@ class MobileGame {
 
         this.sound = new SoundEngine();
         this.bunker = new BunkerBuilder(this.scene);
-        this.officer = new OfficerAI(this.sound);
-        this.sherman = new ShermanBreachManager(this.scene, this.bunker, this.sound);
-        this.touch = new TouchControls(this.camera);
+        this.bunker.build();
+
+        this.controls = new TouchControls(this.camera, this.bunker.colliders);
+        this.officer = new OfficerAI(this.bunker, this.sound);
 
         this.gameTime = 0;
-        this.soldierCount = 50;
         this.isGameOver = false;
 
         this.init();
     }
 
     init() {
-        // Mobil GPU Performansı için Düşük Çözünürlük Ölçeği (Pixel Ratio Sabitleme)
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera.position.set(0, 1.7, 5);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.camera.position.set(0, 1.7, 10);
 
-        this.bunker.buildBunker();
+        // Buton Dinleyicileri
+        document.getElementById('start-btn').addEventListener('click', () => {
+            this.sound.init();
+            document.getElementById('overlay').classList.add('hidden');
+            this.lastTime = performance.now();
+            this.animate();
+        });
 
-        // Mobil Buton Olayları
-        document.getElementById('start-btn').addEventListener('click', () => this.start());
-
+        // Aksiyon Butonları
+        document.getElementById('btn-fire').addEventListener('click', () => this.sound.playGunshot());
         document.getElementById('btn-crouch').addEventListener('click', () => {
-            // Emre uyulduğunu bildir
-            this.officer.complianceTimer = 4.0;
+            this.camera.position.y = 1.0; // Eğil
+            this.officer.complyWithOrder();
         });
-
-        document.getElementById('btn-fire').addEventListener('click', () => {
-            this.sound.playGunshot();
+        document.getElementById('btn-prone').addEventListener('click', () => {
+            this.camera.position.y = 0.4; // Yat
+            this.officer.complyWithOrder();
         });
+        document.getElementById('btn-bayonet').addEventListener('click', () => this.officer.complyWithOrder());
+        document.getElementById('btn-reload').addEventListener('click', () => this.officer.complyWithOrder());
     }
 
-    start() {
-        this.sound.init();
-        document.getElementById('overlay').classList.add('hidden');
-        this.lastTime = performance.now();
-        this.animate();
-    }
-
-    triggerGameOver(reasonTitle, reasonDetail) {
+    triggerGameOver(title, detail) {
         this.isGameOver = true;
         document.getElementById('game-over').classList.remove('hidden');
-        document.getElementById('death-reason').innerText = reasonTitle;
-        document.getElementById('death-detail').innerText = reasonDetail;
+        document.getElementById('death-reason').innerText = title;
+        document.getElementById('death-detail').innerText = detail;
     }
 
     animate() {
@@ -69,18 +67,17 @@ class MobileGame {
 
         this.gameTime += delta;
         
-        // Dokunmatik Joystick Hareketini Uygula
-        this.touch.updatePlayerMovement(this.camera);
+        // Süre HUD
+        const mins = Math.floor(this.gameTime / 60).toString().padStart(2, '0');
+        const secs = Math.floor(this.gameTime % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${mins}:${secs}`;
 
-        // Mantık Turları
-        this.officer.update(delta, this.camera.position, this.isGameOver, (t, d) => this.triggerGameOver(t, d));
-        this.sherman.checkTimer(this.gameTime, (deadCount) => {
-            this.soldierCount = Math.max(0, this.soldierCount - deadCount);
-            document.getElementById('soldier-count').innerText = `${this.soldierCount} / 50`;
-        });
+        // Güncellemeler
+        this.controls.updateMovement();
+        this.officer.update(delta, this.camera.position, (t, d) => this.triggerGameOver(t, d));
 
         this.renderer.render(this.scene, this.camera);
     }
 }
 
-new MobileGame();
+new Game();
