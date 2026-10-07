@@ -1,52 +1,103 @@
 export class BunkerBuilder {
     constructor(scene) {
         this.scene = scene;
-        this.mainDoor = null;
+        this.colliders = []; // Duvar çarpışma kutuları (Bug önleyici)
+        this.npcs = [];      // 3D Askerler
+        this.officerMesh = null;
+        this.eliteSoldiers = [];
     }
 
-    buildBunker() {
-        // Sığınak Malzemesi (Koyu Beton)
-        const concreteMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
-        const doorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.8, roughness: 0.4 });
+    build() {
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.9 });
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
 
-        // Zemin ve Tavan
-        const floorGeo = new THREE.PlaneGeometry(20, 40);
-        const floor = new THREE.Mesh(floorGeo, concreteMat);
+        // Ana Zemin
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 60), floorMat);
         floor.rotation.x = -Math.PI / 2;
         this.scene.add(floor);
 
-        const ceiling = new THREE.Mesh(floorGeo, concreteMat);
-        ceiling.position.y = 5;
+        // Tavan
+        const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(30, 60), wallMat);
+        ceiling.position.y = 4;
         ceiling.rotation.x = Math.PI / 2;
         this.scene.add(ceiling);
 
-        // Yan Duvarlar
-        const wallGeo = new THREE.BoxGeometry(1, 5, 40);
-        const leftWall = new THREE.Mesh(wallGeo, concreteMat);
-        leftWall.position.set(-10, 2.5, 0);
-        this.scene.add(leftWall);
+        // Dış Duvarlar
+        this.createWall(0, 2, -30, 30, 4, 1, wallMat);  // Ön
+        this.createWall(0, 2, 30, 30, 4, 1, wallMat);   // Arka
+        this.createWall(-15, 2, 0, 1, 4, 60, wallMat);  // Sol
+        this.createWall(15, 2, 0, 1, 4, 60, wallMat);   // Sağ
 
-        const rightWall = new THREE.Mesh(wallGeo, concreteMat);
-        rightWall.position.set(10, 2.5, 0);
-        this.scene.add(rightWall);
+        // İç Odalar ve Koridor Duvarları
+        this.createWall(-5, 2, -10, 18, 4, 1, wallMat);
+        this.createWall(5, 2, 10, 18, 4, 1, wallMat);
 
-        // Ana Sığınak Giriş Kapısı (10. Dakikada Sherman'ın Vuracağı Kapı)
-        const doorGeo = new THREE.BoxGeometry(8, 4.5, 0.5);
-        this.mainDoor = new THREE.Mesh(doorGeo, doorMat);
-        this.mainDoor.position.set(0, 2.25, -19.75);
-        this.scene.add(this.mainDoor);
-
-        // Kırmızı Acil Durum Işıkları
-        const redLight1 = new THREE.PointLight(0xff0000, 1.5, 15);
-        redLight1.position.set(0, 4, -10);
-        this.scene.add(redLight1);
-
-        const redLight2 = new THREE.PointLight(0xff0000, 1.5, 15);
-        redLight2.position.set(0, 4, 10);
-        this.scene.add(redLight2);
-
-        // Ortam Aydınlatması (Zayıf Karanlık Sığınak Hissiyatı)
-        const ambientLight = new THREE.AmbientLight(0x222222);
+        // Aydınlatma
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
         this.scene.add(ambientLight);
+
+        for (let z = -20; z <= 20; z += 10) {
+            const light = new THREE.PointLight(0xff3300, 1.2, 12);
+            light.position.set(0, 3.5, z);
+            this.scene.add(light);
+        }
+
+        // 3D Askerlerin Oluşturulması (Erler, Elitler ve Subay)
+        this.spawnNPCs();
+    }
+
+    createWall(x, y, z, w, h, d, mat) {
+        const geo = new THREE.BoxGeometry(w, h, d);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(x, y, z);
+        this.scene.add(mesh);
+
+        // Çarpışma kontrolü için bounding box kaydı
+        const box = new THREE.Box3().setFromObject(mesh);
+        this.colliders.push(box);
+    }
+
+    spawnNPCs() {
+        // Normal Erler (Gri/Yeşil Modeller)
+        const soldierMat = new THREE.MeshStandardMaterial({ color: 0x4b5320 });
+        const eliteMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a }); // Elit Askerler Siyah
+        const officerMat = new THREE.MeshStandardMaterial({ color: 0x8b0000 }); // Subay Koyu Kırmızı
+
+        // 45 Er Modelini Odalara Dağıt
+        for (let i = 0; i < 15; i++) {
+            const soldier = this.createHumanMesh(soldierMat);
+            soldier.position.set((Math.random() - 0.5) * 20, 0, (Math.random() - 0.5) * 40);
+            this.scene.add(soldier);
+            this.npcs.push(soldier);
+        }
+
+        // 2 Elit Asker (Siperlerinde Bekleyenler)
+        for (let i = 0; i < 2; i++) {
+            const elite = this.createHumanMesh(eliteMat);
+            elite.position.set(-3 + (i * 6), 0, -18);
+            this.scene.add(elite);
+            this.eliteSoldiers.push(elite);
+        }
+
+        // 1 Subay (Sığınakta Gezen)
+        this.officerMesh = this.createHumanMesh(officerMat);
+        this.officerMesh.position.set(0, 0, -5);
+        this.scene.add(this.officerMesh);
+    }
+
+    createHumanMesh(material) {
+        const group = new THREE.Group();
+        
+        // Gövde
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.4, 8), material);
+        body.position.y = 0.7;
+        group.add(body);
+
+        // Baş / Miğfer
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), material);
+        head.position.y = 1.5;
+        group.add(head);
+
+        return group;
     }
 }
