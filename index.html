@@ -2,58 +2,61 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Berlin 1945: Sığınak (Bunker Siege)</title>
+    <!-- Mobil Ekran Ölçeklemesi ve Yakınlaştırmayı Engelleme -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Berlin 1945: Sığınak (Mobil)</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Three.js Kütüphanesi -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <!-- 3D Tuval -->
     <canvas id="bg"></canvas>
 
-    <!-- Nişangah -->
-    <div id="crosshair">+</div>
-
-    <!-- HUD Göstergeleri -->
+    <!-- Mobil HUD Barı -->
     <div id="hud">
         <div class="hud-box">
-            <span class="hud-label">HAYATTA KALMA SÜRESİ</span>
+            <span class="hud-label">SÜRE</span>
             <span id="timer" class="hud-value">00:00</span>
         </div>
         <div class="hud-box">
-            <span class="hud-label">KALAN DOST ASKER</span>
+            <span class="hud-label">DOST ASKER</span>
             <span id="soldier-count" class="hud-value">50 / 50</span>
-        </div>
-        <div class="hud-box">
-            <span class="hud-label">MÜHİMMAT</span>
-            <span id="ammo-count" class="hud-value">15 / 45</span>
         </div>
     </div>
 
     <!-- Subay Emir Kutusu -->
     <div id="order-box">
-        <div id="officer-title">SUBAY EMİR VERİYOR:</div>
-        <div id="current-order">SIĞINAK SAVUNMASINA GEÇ!</div>
-        <div id="compliance-warning">Uymak için kalan süre: <span id="execution-timer">4.0</span>s</div>
+        <div id="officer-title">SUBAY EMRİ:</div>
+        <div id="current-order">SİPER AL VE BEKLE!</div>
+        <div id="compliance-warning">İnfaza kalan: <span id="execution-timer">4.0</span>s</div>
     </div>
 
-    <!-- Başlangıç / Pause Ekranı -->
+    <!-- MOBİL KONTROLLER -->
+    <!-- Sol: Sanal Joystick Alanı -->
+    <div id="joystick-zone">
+        <div id="joystick-knob"></div>
+    </div>
+
+    <!-- Sağ: Aksiyon Butonları -->
+    <div id="mobile-actions">
+        <button id="btn-crouch" class="touch-btn">SİPER AL / EĞİL</button>
+        <button id="btn-fire" class="touch-btn fire-btn">ATEŞ ET</button>
+    </div>
+
+    <!-- Başlangıç Ekranı -->
     <div id="overlay">
         <h1>BERLİN 1945: SIĞINAK</h1>
-        <p>1 Subay, 1 Çavuş, 1 Komutan, 2 Elit Asker ve 45 Er ile sıkıştınız.</p>
-        <p><strong>Kural:</strong> Subay emrine 4 saniye içinde uy. Uymayan sığınak içinde anında infaz edilir.</p>
-        <button id="start-btn">SIĞINAKTA GÖREVE BAŞLA</button>
+        <p>📱 Telefonu **Yatay (Landscape)** konumda tutun.</p>
+        <p>Subay emir verdiğinde 4 saniye içinde sağdaki butonlarla emri uygula. İtaatsizlik infaz sebebidir!</p>
+        <button id="start-btn">SAVAŞA BAŞLA</button>
     </div>
 
     <!-- Game Over Ekranı -->
     <div id="game-over" class="hidden">
         <h1 id="death-reason">İNFÂZ EDİLDİNİZ</h1>
-        <p id="death-detail">Komutanın emrine uymadığınız için vuruldunuz.</p>
-        <button onclick="location.reload()">YENİDEN DENE</button>
+        <p id="death-detail">Emre uymadığınız için vuruldunuz.</p>
+        <button onclick="location.reload()">YENİDEN BAŞLA</button>
     </div>
 
-    <!-- ES6 Modülü olarak ana JS -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
