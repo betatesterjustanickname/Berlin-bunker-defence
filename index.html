@@ -2,17 +2,16 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <!-- Mobil Ekran Ölçeklemesi ve Yakınlaştırmayı Engelleme -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Berlin 1945: Sığınak (Mobil)</title>
+    <title>Berlin 1945: Sığınak</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <canvas id="bg"></canvas>
 
-    <!-- Mobil HUD Barı -->
-    <div id="hud">
+    <!-- Sol Üst: Süre ve Asker Sayısı -->
+    <div id="hud-left">
         <div class="hud-box">
             <span class="hud-label">SÜRE</span>
             <span id="timer" class="hud-value">00:00</span>
@@ -23,37 +22,46 @@
         </div>
     </div>
 
-    <!-- Subay Emir Kutusu -->
+    <!-- Sağ Üst: Subay Emir Koyu -->
     <div id="order-box">
         <div id="officer-title">SUBAY EMRİ:</div>
         <div id="current-order">SİPER AL VE BEKLE!</div>
-        <div id="compliance-warning">İnfaza kalan: <span id="execution-timer">4.0</span>s</div>
+        <div id="compliance-warning">Kalan Süre: <span id="execution-timer">25.0</span>s</div>
     </div>
 
-    <!-- MOBİL KONTROLLER -->
-    <!-- Sol: Sanal Joystick Alanı -->
+    <!-- Sol Alt: Hareket Joystick -->
     <div id="joystick-zone">
         <div id="joystick-knob"></div>
     </div>
 
-    <!-- Sağ: Aksiyon Butonları -->
-    <div id="mobile-actions">
-        <button id="btn-crouch" class="touch-btn">SİPER AL / EĞİL</button>
-        <button id="btn-fire" class="touch-btn fire-btn">ATEŞ ET</button>
+    <!-- Sağ Alt: Dairesel Aksiyon Butonları Düzeni -->
+    <div id="action-cluster">
+        <!-- Ateş Et (Ana Sağ Alt Daire) -->
+        <button id="btn-fire" class="round-btn btn-main">ATEŞ</button>
+        
+        <!-- Ateşin Solunda: Süngü Tak -->
+        <button id="btn-bayonet" class="round-btn btn-sub">SÜNGÜ</button>
+
+        <!-- Ateşin Sol Üstünde: Reload -->
+        <button id="btn-reload" class="round-btn btn-sub">DOLDUR</button>
+
+        <!-- Ateşin Sağ Üstünde: Eğil -->
+        <button id="btn-crouch" class="round-btn btn-sub">EĞİL</button>
+
+        <!-- Eğilin Yanında / Sağ Üst Dışta: Yat -->
+        <button id="btn-prone" class="round-btn btn-sub">YAT</button>
     </div>
 
-    <!-- Başlangıç Ekranı -->
+    <!-- Ekran Katmanları -->
     <div id="overlay">
         <h1>BERLİN 1945: SIĞINAK</h1>
-        <p>📱 Telefonu **Yatay (Landscape)** konumda tutun.</p>
-        <p>Subay emir verdiğinde 4 saniye içinde sağdaki butonlarla emri uygula. İtaatsizlik infaz sebebidir!</p>
+        <p>Subay sığınakta dolaşarak emirler verir. Emirlere uymak için yeterli süreniz var. İtaatsizlik halinde Elit Askerler sizi infaz eder.</p>
         <button id="start-btn">SAVAŞA BAŞLA</button>
     </div>
 
-    <!-- Game Over Ekranı -->
     <div id="game-over" class="hidden">
         <h1 id="death-reason">İNFÂZ EDİLDİNİZ</h1>
-        <p id="death-detail">Emre uymadığınız için vuruldunuz.</p>
+        <p id="death-detail">Elit askerler tarafından tutularak infaz edildiniz.</p>
         <button onclick="location.reload()">YENİDEN BAŞLA</button>
     </div>
 
