@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Berlin 1945: Sığınak (Bunker Siege)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Three.js Kütüphanesi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <!-- 3D Tuval -->
+    <canvas id="bg"></canvas>
+
+    <!-- Nişangah -->
+    <div id="crosshair">+</div>
+
+    <!-- HUD Göstergeleri -->
+    <div id="hud">
+        <div class="hud-box">
+            <span class="hud-label">HAYATTA KALMA SÜRESİ</span>
+            <span id="timer" class="hud-value">00:00</span>
+        </div>
+        <div class="hud-box">
+            <span class="hud-label">KALAN DOST ASKER</span>
+            <span id="soldier-count" class="hud-value">50 / 50</span>
+        </div>
+        <div class="hud-box">
+            <span class="hud-label">MÜHİMMAT</span>
+            <span id="ammo-count" class="hud-value">15 / 45</span>
+        </div>
+    </div>
+
+    <!-- Subay Emir Kutusu -->
+    <div id="order-box">
+        <div id="officer-title">SUBAY EMİR VERİYOR:</div>
+        <div id="current-order">SIĞINAK SAVUNMASINA GEÇ!</div>
+        <div id="compliance-warning">Uymak için kalan süre: <span id="execution-timer">4.0</span>s</div>
+    </div>
+
+    <!-- Başlangıç / Pause Ekranı -->
+    <div id="overlay">
+        <h1>BERLİN 1945: SIĞINAK</h1>
+        <p>1 Subay, 1 Çavuş, 1 Komutan, 2 Elit Asker ve 45 Er ile sıkıştınız.</p>
+        <p><strong>Kural:</strong> Subay emrine 4 saniye içinde uy. Uymayan sığınak içinde anında infaz edilir.</p>
+        <button id="start-btn">SIĞINAKTA GÖREVE BAŞLA</button>
+    </div>
+
+    <!-- Game Over Ekranı -->
+    <div id="game-over" class="hidden">
+        <h1 id="death-reason">İNFÂZ EDİLDİNİZ</h1>
+        <p id="death-detail">Komutanın emrine uymadığınız için vuruldunuz.</p>
+        <button onclick="location.reload()">YENİDEN DENE</button>
+    </div>
+
+    <!-- ES6 Modülü olarak ana JS -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
