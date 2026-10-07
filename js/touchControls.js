@@ -1,13 +1,15 @@
 export class TouchControls {
-    constructor(camera) {
+    constructor(camera, colliders) {
         this.camera = camera;
-        this.moveVector = { x: 0, y: 0 }; // Joystick hareket yönü
-        
+        this.colliders = colliders;
+        this.moveVector = { x: 0, y: 0 };
+        this.pitch = 0;
+        this.yaw = 0;
+
         this.initJoystick();
         this.initTouchLook();
     }
 
-    // Sol Joystick İşlevselliği
     initJoystick() {
         const zone = document.getElementById('joystick-zone');
         const knob = document.getElementById('joystick-knob');
@@ -27,7 +29,7 @@ export class TouchControls {
             }
         });
 
-        const resetKnob = (e) => {
+        const reset = (e) => {
             for (let touch of e.changedTouches) {
                 if (touch.identifier === touchId) {
                     knob.style.transform = `translate(0px, 0px)`;
@@ -37,8 +39,8 @@ export class TouchControls {
             }
         };
 
-        zone.addEventListener('touchend', resetKnob);
-        zone.addEventListener('touchcancel', resetKnob);
+        zone.addEventListener('touchend', reset);
+        zone.addEventListener('touchcancel', reset);
     }
 
     updateKnob(touch, zone, knob) {
@@ -48,40 +50,47 @@ export class TouchControls {
 
         let dx = touch.clientX - centerX;
         let dy = touch.clientY - centerY;
-        const maxRadius = rect.width / 2;
+        const radius = rect.width / 2;
 
-        const distance = Math.hypot(dx, dy);
-        if (distance > maxRadius) {
-            dx = (dx / distance) * maxRadius;
-            dy = (dy / distance) * maxRadius;
+        const dist = Math.hypot(dx, dy);
+        if (dist > radius) {
+            dx = (dx / dist) * radius;
+            dy = (dy / dist) * radius;
         }
 
         knob.style.transform = `translate(${dx}px, ${dy}px)`;
-        // -1 ile +1 arasında normalize edilmiş hareket vektörü
-        this.moveVector = { x: dx / maxRadius, y: dy / maxRadius };
+        this.moveVector = { x: dx / radius, y: dy / radius };
     }
 
-    // Ekranın Sağ Tarafından Dokunarak Kamerayı Çevirme
+    // Kamera Çevirme (Bakış Kontrolü)
     initTouchLook() {
-        let lastX = 0;
-        let lastY = 0;
+        let lastX = 0, lastY = 0;
 
         window.addEventListener('touchstart', (e) => {
-            if (e.touches[0].clientX > window.innerWidth / 2) {
-                lastX = e.touches[0].clientX;
-                lastY = e.touches[0].clientY;
+            for (let touch of e.touches) {
+                // Ekranın sağ tarafına dokunulduğunda bakışı çevir
+                if (touch.clientX > window.innerWidth / 2) {
+                    lastX = touch.clientX;
+                    lastY = touch.clientY;
+                }
             }
         });
 
         window.addEventListener('touchmove', (e) => {
             for (let touch of e.touches) {
                 if (touch.clientX > window.innerWidth / 2) {
-                    const deltaX = touch.clientX - lastX;
-                    const deltaY = touch.clientY - lastY;
+                    const dx = touch.clientX - lastX;
+                    const dy = touch.clientY - lastY;
 
-                    this.camera.rotation.y -= deltaX * 0.005; // Hassasiyet
-                    this.camera.rotation.x -= deltaY * 0.005;
-                    this.camera.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, this.camera.rotation.x));
+                    this.yaw -= dx * 0.004;
+                    this.pitch -= dy * 0.004;
+
+                    // Yukarı/Aşağı bakış sınırlandırması (Kamera kilitlenme bugını çözer)
+                    this.pitch = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, this.pitch));
+
+                    this.camera.rotation.set(0, 0, 0);
+                    this.camera.rotation.y = this.yaw;
+                    this.camera.rotation.x = this.pitch;
 
                     lastX = touch.clientX;
                     lastY = touch.clientY;
@@ -90,11 +99,26 @@ export class TouchControls {
         });
     }
 
-    updatePlayerMovement(camera, speed = 0.08) {
-        if (this.moveVector.x !== 0 || this.moveVector.y !== 0) {
-            camera.translateZ(this.moveVector.y * speed);
-            camera.translateX(this.moveVector.x * speed);
-            camera.position.y = 1.7; // Yüksekliği sabitle
+    updateMovement(speed = 0.08) {
+        if (this.moveVector.x === 0 && this.moveVector.y === 0) return;
+
+        const oldPos = this.camera.position.clone();
+
+        // İleri / Geri ve Sağ / Sol Hareket
+        this.camera.translateZ(this.moveVector.y * speed);
+        this.camera.translateX(this.moveVector.x * speed);
+
+        // Duvar Çarpışma Kontrolü (Duvarın içine girmeyi engeller)
+        const playerBox = new THREE.Box3().setFromCenterAndSize(
+            this.camera.position,
+            new THREE.Vector3(0.6, 1.7, 0.6)
+        );
+
+        for (let collider of this.colliders) {
+            if (playerBox.intersectsBox(collider)) {
+                this.camera.position.copy(oldPos); // Çarparsa geri it
+                break;
+            }
         }
     }
 }
