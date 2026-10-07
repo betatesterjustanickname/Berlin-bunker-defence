@@ -1,9 +1,8 @@
 * {
     box-sizing: border-box;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
     user-select: none;
-    touch-action: none; /* Dokunmatik kaydırma engeli */
+    touch-action: none;
     margin: 0;
     padding: 0;
 }
@@ -13,67 +12,63 @@ body, html {
     height: 100%;
     overflow: hidden;
     background-color: #000;
-    font-family: monospace;
+    font-family: 'Courier New', monospace;
     color: #fff;
 }
 
 #bg {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: 1;
 }
 
-/* Mobil HUD */
-#hud {
+/* Sol Üst HUD */
+#hud-left {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
+    top: 15px;
+    left: 15px;
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
     z-index: 10;
 }
 
 .hud-box {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(10, 10, 10, 0.85);
     border: 1px solid #555;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
-.hud-label { font-size: 10px; color: #aaa; display: block; }
-.hud-value { font-size: 18px; font-weight: bold; color: #f33; }
+.hud-label { font-size: 10px; color: #888; display: block; }
+.hud-value { font-size: 16px; font-weight: bold; color: #f33; }
 
-/* Emir Kutusu */
+/* Sağ Üst: Subay Emir Kutusu */
 #order-box {
     position: absolute;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(30, 0, 0, 0.85);
+    top: 15px;
+    right: 15px;
+    background: rgba(30, 0, 0, 0.9);
     border: 2px solid #f00;
-    padding: 8px 16px;
-    text-align: center;
+    padding: 10px 16px;
+    text-align: right;
+    border-radius: 6px;
     z-index: 10;
-    width: 80%;
-    max-width: 400px;
+    min-width: 220px;
 }
 
-#current-order { font-size: 16px; font-weight: bold; color: #fff; }
-#compliance-warning { font-size: 12px; color: #fa0; }
+#officer-title { font-size: 11px; color: #ff8888; }
+#current-order { font-size: 15px; font-weight: bold; color: #fff; margin: 2px 0; }
+#compliance-warning { font-size: 11px; color: #ffaa00; }
 
-/* Sol Sanal Joystick Zone */
+/* Sol Alt Joystick */
 #joystick-zone {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
-    width: 120px;
-    height: 120px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    bottom: 25px;
+    left: 25px;
+    width: 110px;
+    height: 110px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.25);
     border-radius: 50%;
     z-index: 10;
     display: flex;
@@ -82,56 +77,90 @@ body, html {
 }
 
 #joystick-knob {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 0, 0, 0.6);
+    width: 45px;
+    height: 45px;
+    background: rgba(200, 30, 30, 0.7);
     border-radius: 50%;
     position: absolute;
 }
 
-/* Sağ Mobil Aksiyon Butonları */
-#mobile-actions {
+/* Sağ Alt Dairesel Aksiyon Kümesi */
+#action-cluster {
     position: absolute;
     bottom: 20px;
     right: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    width: 240px;
+    height: 240px;
     z-index: 10;
 }
 
-.touch-btn {
-    background: rgba(40, 40, 40, 0.85);
-    border: 2px solid #888;
-    color: white;
-    padding: 16px 24px;
-    font-size: 14px;
+.round-btn {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid #aaa;
+    background: rgba(30, 30, 30, 0.85);
+    color: #fff;
     font-weight: bold;
-    border-radius: 8px;
-    min-width: 130px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-.touch-btn:active {
+.round-btn:active {
     background: #a00;
     border-color: #f00;
+    transform: scale(0.95);
 }
 
-.fire-btn {
+/* Ateş Et (Ana Büyük Daire - Sağ Alt) */
+.btn-main {
+    width: 75px;
+    height: 75px;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(150, 0, 0, 0.8);
     border-color: #f33;
-    background: rgba(100, 0, 0, 0.7);
+    font-size: 14px;
 }
 
-/* Menüler */
+/* Yardımcı Daireler */
+.btn-sub {
+    width: 55px;
+    height: 55px;
+    font-size: 10px;
+}
+
+/* Yerleşim Konumları */
+#btn-bayonet { bottom: 20px; right: 100px; }  /* Ateşin Solunda */
+#btn-reload  { bottom: 85px; right: 85px; }   /* Ateşin Sol Üstünde */
+#btn-crouch  { bottom: 95px; right: 15px; }   /* Ateşin Sağ Üstünde */
+#btn-prone   { bottom: 160px; right: 15px; }  /* Eğilin Üstünde/Yanında */
+
+/* Ekran Katmanları */
 #overlay, #game-over {
     position: absolute;
     inset: 0;
-    background: rgba(10, 10, 10, 0.95);
+    background: rgba(5, 5, 5, 0.95);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 30;
     padding: 20px;
+    text-align: center;
 }
 
 .hidden { display: none !important; }
+
+button#start-btn, #game-over button {
+    background: #900;
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 25px;
+    margin-top: 20px;
+}
